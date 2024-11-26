@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>モグラゲーム</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(7, 1fr);
+      gap: 5px;
+      width: 95vmin;
+      height: calc(95vmin * 7 / 4);
+      padding-top: calc((95vmin / 4) / 2);
+      padding-bottom: calc((95vmin / 4) / 2);
+      background-color: white;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    .cell {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      color: #888;
+      aspect-ratio: 1;
+    }
+
+    .button {
+      width: 80%;
+      height: 80%;
+      max-width: 70px;
+      max-height: 70px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 14px;
+      display: none;
+      position: absolute;
+    }
+
+    #startButton {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 15px 30px;
+      font-size: 16px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #result {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 14px;
+      color: #333;
+      display: none;
+      text-align: center;
+      width: 80%;
+      max-height: 60%;
+      overflow-y: auto;
+      background-color: #f9f9f9;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #result ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      columns: 2;
+      column-gap: 20px;
+    }
+
+    #result li {
+      font-size: 12px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- 28個のセル -->
+    <div class="cell">　<button class="button"></button></div>
+    <div class="cell">　<button class="button"></button></div>
+    <div class="cell">　<button class="button"></button></div>
+    <div class="cell">　<button class="button"></button></div>
+    <div class="cell">　<button class="button"></button></div>
+    <div class="cell">　<button class="button"></button></div>
+    <div class="cell">　<button class="button"></button></div>
+    <div class="cell">　<button class="button"></button></div>
+    <div class="cell">　<button class="button"></button></div>
+    <div class="cell">　 <button class="button"></button></div>
+    <div class="cell">　 <button class="button"></button></div>
+    <div class="cell">　　 <button class="button"></button></div>
+    <div class="cell">　<button class="button"></button></div>
+    <div class="cell">　 <button class="button"></button></div>
+    <div class="cell">　 <button class="button"></button></div>
+    <div class="cell">　 <button class="button"></button></div>
+    <div class="cell">　 <button class="button"></button></div>
+    <div class="cell">　 <button class="button"></button></div>
+    <div class="cell">　 <button class="button"></button></div>
+    <div class="cell">　 <button class="button"></button></div>
+    <div class="cell">　 <button class="button"></button></div>
+    <div class="cell">　 <button class="button"></button></div>
+    <div class="cell">　 <button class="button"></button></div>
+    <div class="cell">　 <button class="button"></button></div>
+    <div class="cell">　 <button class="button"></button></div>
+    <div class="cell">　 <button class="button"></button></div>
+    <div class="cell">　 <button class="button"></button></div>
+    <div class="cell">　 <button class="button"></button></div>
+  </div>
+
+  <button id="startButton">スタート</button>
+  <div id="result"></div>
+
+  <script>
+    const buttons = Array.from(document.querySelectorAll('.button'));
+    const totalButtons = 30;
+    const gridCells = buttons.length;
+    let score = 0;
+    let times = Array(totalButtons).fill('失敗');
+    let successfulTimes = [];
+    let currentIndex = 0;
+    let lastPosition = -1;
+
+    function getRandomPosition() {
+      let position;
+      do {
+        position = Math.floor(Math.random() * gridCells);
+      } while (position === lastPosition);
+      lastPosition = position;
+      return position;
+    }
+
+    function handleClick(event) {
+      if (event.target.style.display === 'flex') {
+        const endTime = Date.now();
+        const elapsedTime = (endTime - parseInt(event.target.dataset.startTime)) / 1000;
+        times[currentIndex] = `モグラ ${currentIndex + 1}: ${elapsedTime.toFixed(2)}秒`;
+        successfulTimes.push(elapsedTime);
+        score++;
+        event.target.style.display = 'none';
+      }
+    }
+
+    function showNextMole() {
+      if (currentIndex >= totalButtons) {
+        displayResults();
+        return;
+      }
+
+      const position = getRandomPosition();
+      const button = buttons[position];
+      button.style.display = 'flex';
+      button.dataset.startTime = Date.now();
+      button.addEventListener('click', handleClick, { once: true });
+
+      setTimeout(() => {
+        if (button.style.display === 'flex') {
+          times[currentIndex] = `モグラ ${currentIndex + 1}: 失敗`;
+          button.style.display = 'none';
+        }
+        currentIndex++;
+        setTimeout(showNextMole, 200);
+      }, 600);
+    }
+
+    function displayResults() {
+      const resultDiv = document.getElementById('result');
+      let averageTime =
+        successfulTimes.length > 0
+          ? (successfulTimes.reduce((a, b) => a + b, 0) / successfulTimes.length).toFixed(2)
+          : 'N/A';
+      let resultHTML = `<strong>スコア:</strong> ${score} / ${totalButtons}<br>`;
+      resultHTML += `<strong>平均タップ時間:</strong> ${averageTime}秒<br>`;
+      resultHTML += `<strong>詳細:</strong><ul>`;
+      times.forEach((time, index) => {
+        resultHTML += `<li>${time}</li>`;
+      });
+      resultHTML += `</ul>`;
+      resultDiv.innerHTML = resultHTML;
+      resultDiv.style.display = 'block';
+    }
+
+    document.getElementById('startButton').addEventListener('click', () => {
+      score = 0;
+      times = Array(totalButtons).fill('失敗');
+      successfulTimes = [];
+      currentIndex = 0;
+      lastPosition = -1;
+      document.getElementById('startButton').style.display = 'none';
+      buttons.forEach(button => button.style.display = 'none');
+      showNextMole();
+    });
+  </script>
+
+</body>
+</html>
